@@ -48,13 +48,14 @@ var Q=[
 {t:"¿Dulce o salado?",k:"dulce o salado",type:"one",o:["Dulce","Salado","Mitad y mitad"]},
 {t:"¿Qué música te gusta escuchar?",k:"música",type:"multi",o:["Pop","Rock / metal","Reguetón / urbano","K-pop","Música de anime / J-pop","Indie / alternativo","Regional mexicano","Lo-fi / instrumental"],hint:"Puedes elegir varios"},
 {t:"¿Qué tipo de series o películas disfrutas?",k:"series y películas",type:"multi",o:["Comedia","Romance","Terror","Fantasía","Misterio / crimen","Animación","Sci-fi","Documentales"],hint:"Puedes elegir varios"},
-{t:"¿Cuál es tu anime favorito?",k:"anime favorito",type:"text",ph:"Escribe el título (o 'no veo anime')"},
+{t:"¿Cuál es tu anime favorito?",k:"anime favorito",type:"text",ph:"Escribe el título"},
 {t:"¿Cuál es tu plan ideal de fin de semana?",k:"plan ideal",type:"one",o:["Maratón de series en casa","Salir con amigos","Paseo o café","Videojuegos","Dormir todo el día"]},
 {t:"¿Eres más de mañana o de noche?",k:"mañana o noche",type:"one",o:["Mañana","Noche","Depende del día"]},
 {t:"¿Qué animal te gusta más?",k:"animal favorito",type:"one",o:["Gatos","Perros","Conejos","Aves","Otro"]},
 {t:"¿Qué color te representa más?",k:"color",type:"one",o:["Rosa","Morado","Negro","Azul","Rojo","Verde"]},
 {t:"¿Qué regalo te haría más feliz?",k:"regalo ideal",type:"one",o:["Peluche o figura","Ropa o accesorios","Comida o postres","Algo hecho a mano","Una salida especial"]}
 ];
+var IG_USER="miuel_charbel.a.c";
 var i=0,A={};
 var card=document.getElementById("card"),bar=document.getElementById("bar");
 function esc(s){return String(s).replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})}
@@ -98,12 +99,13 @@ function fin(){
   '<circle cx="68" cy="146" r="7" fill="#ffb3dc" opacity=".7"/><circle cx="132" cy="146" r="7" fill="#ffb3dc" opacity=".7"/>'+
   '<ellipse cx="62" cy="188" rx="18" ry="14" fill="#1d1328"/><ellipse cx="138" cy="188" rx="18" ry="14" fill="#1d1328"/></svg>'+
   '<div class="sum" id="sm">'+esc(summary())+'</div>'+
-  '<div class="nav"><button class="btn sec" id="rs">Reiniciar</button><button class="btn" id="cp">Copiar respuestas</button></div></div>';
+  '<div class="nav"><button class="btn sec" id="rs">Reiniciar</button><button class="btn" id="cp">Enviar respuestas</button></div><p class="hint" style="margin-top:12px">Se abrirá el chat de Instagram: solo pega tus respuestas y envíalas 💜</p></div>';
   document.getElementById("rs").onclick=function(){A={};i=0;document.getElementById("sub").textContent="Hola Dany, quiero conocer tus gustos";render()};
   document.getElementById("cp").onclick=function(){
     var b=this,t=summary();
-    function done(){b.textContent="¡Copiado!"}
+    function done(){b.textContent="¡Copiado! Pégalas en el chat"}
     try{navigator.clipboard.writeText(t).then(done,function(){sel()})}catch(e){sel()}
+    window.open("https://ig.me/m/"+IG_USER,"_blank");
     function sel(){var r=document.createRange();r.selectNodeContents(document.getElementById("sm"));var s=getSelection();s.removeAllRanges();s.addRange(r);try{document.execCommand("copy");done()}catch(e){}}
   };
 }
