@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Encuesta para Dany</title>
+<style>
+:root{--bg:#fdf2fa;--card:#fff;--tx:#2a1636;--mut:#7a5a8a;--pk:#ff5fb0;--pu:#7b3fe4;--bd:#f0cfe6;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);color-scheme:light dark}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#150b1f;--card:#22132f;--tx:#f7e9ff;--mut:#b99ccb;--bd:#3d2452}}
+:root[data-theme="dark"]{--bg:#150b1f;--card:#22132f;--tx:#f7e9ff;--mut:#b99ccb;--bd:#3d2452}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--tx);font-family:system-ui,-apple-system,"Segoe UI",sans-serif;min-height:100vh;display:flex;justify-content:center;padding:20px}
+.wrap{width:100%;max-width:520px}
+h1{font-size:1.5rem;text-align:center;margin:8px 0 4px;color:var(--pu)}
+.sub{text-align:center;color:var(--mut);margin:0 0 16px}
+.bar{height:8px;background:var(--bd);border-radius:99px;overflow:hidden;margin-bottom:16px}
+.bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--pk),var(--pu));transition:width .3s}
+.card{background:var(--card);border:2px solid var(--bd);border-radius:20px;padding:20px}
+.q{font-size:1.15rem;font-weight:600;margin:0 0 14px}
+.opts{display:grid;gap:8px}
+.opt{border:2px solid var(--bd);background:transparent;color:var(--tx);border-radius:14px;padding:12px 14px;text-align:left;font-size:1rem;cursor:pointer}
+.opt.on{border-color:var(--pk);background:color-mix(in srgb,var(--pk) 18%,transparent)}
+input[type=text]{width:100%;padding:12px 14px;border-radius:14px;border:2px solid var(--bd);background:transparent;color:var(--tx);font-size:1rem}
+.nav{display:flex;gap:10px;margin-top:16px}
+.btn{flex:1;border:0;border-radius:14px;padding:12px;font-size:1rem;font-weight:600;cursor:pointer;background:linear-gradient(90deg,var(--pk),var(--pu));color:#fff}
+.btn.sec{background:var(--bd);color:var(--tx)}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+.hint{color:var(--mut);font-size:.85rem;margin-top:-8px;margin-bottom:10px}
+.end{text-align:center}
+.bubble{position:relative;display:inline-block;background:var(--card);border:2px solid var(--pk);border-radius:18px;padding:12px 18px;font-weight:700;font-size:1.2rem;margin-bottom:18px}
+.bubble:after{content:"";position:absolute;left:50%;bottom:-12px;margin-left:-10px;border:10px solid transparent;border-top-color:var(--pk);border-bottom:0}
+svg{width:200px;max-width:60%;animation:bob 2s ease-in-out infinite}
+@keyframes bob{50%{transform:translateY(-8px)}}
+.sum{text-align:left;font-size:.9rem;background:var(--bg);border-radius:14px;padding:12px;margin:14px 0;white-space:pre-wrap;color:var(--mut)}
+.hide{display:none}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>🌸 Encuesta para Dany 🌸</h1>
+  <p class="sub" id="sub"> Dany, quiero conocer tus gustos ❤️</p>
+  <div class="bar"><i id="bar"></i></div>
+  <div class="card" id="card"></div>
+</div>
+<script>
+var Q=[
+{t:"¿Cuál es tu comida favorita?",k:"comida favorita",type:"text",ph:"Escribe tu antojo número uno"},
+{t:"¿Dulce o salado?",k:"dulce o salado",type:"one",o:["Dulce","Salado","Mitad y mitad"]},
+{t:"¿Qué música te gusta escuchar?",k:"música",type:"multi",o:["Pop","Rock / metal","Reguetón / urbano","K-pop","Música de anime / J-pop","Indie / alternativo","Regional mexicano","Lo-fi / instrumental"],hint:"Puedes elegir varios"},
+{t:"¿Qué tipo de series o películas disfrutas?",k:"series y películas",type:"multi",o:["Comedia","Romance","Terror","Fantasía","Misterio / crimen","Animación","Sci-fi","Documentales"],hint:"Puedes elegir varios"},
+{t:"¿Cuál es tu anime favorito?",k:"anime favorito",type:"text",ph:"Escribe el título (o 'no veo anime')"},
+{t:"¿Cuál es tu plan ideal de fin de semana?",k:"plan ideal",type:"one",o:["Maratón de series en casa","Salir con amigos","Paseo o café","Videojuegos","Dormir todo el día"]},
+{t:"¿Eres más de mañana o de noche?",k:"mañana o noche",type:"one",o:["Mañana","Noche","Depende del día"]},
+{t:"¿Qué animal te gusta más?",k:"animal favorito",type:"one",o:["Gatos","Perros","Conejos","Aves","Otro"]},
+{t:"¿Qué color te representa más?",k:"color",type:"one",o:["Rosa","Morado","Negro","Azul","Rojo","Verde"]},
+{t:"¿Qué regalo te haría más feliz?",k:"regalo ideal",type:"one",o:["Peluche o figura","Ropa o accesorios","Comida o postres","Algo hecho a mano","Una salida especial"]}
+];
+var i=0,A={};
+var card=document.getElementById("card"),bar=document.getElementById("bar");
+function esc(s){return String(s).replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})}
+function ok(q){var v=A[q.k];return q.type==="multi"?(v&&v.length):(v&&String(v).trim())}
+function render(){
+  if(i>=Q.length)return fin();
+  var q=Q[i],h='<p class="q">'+esc(q.t)+'</p>';
+  if(q.hint)h+='<p class="hint">'+q.hint+'</p>';
+  if(q.type==="text")h+='<input type="text" id="tx" placeholder="'+esc(q.ph)+'" value="'+esc(A[q.k]||"")+'">';
+  else{h+='<div class="opts">';q.o.forEach(function(o,n){
+    var on=q.type==="multi"?(A[q.k]||[]).indexOf(o)>-1:A[q.k]===o;
+    h+='<button class="opt'+(on?" on":"")+'" data-n="'+n+'">'+esc(o)+'</button>'});h+='</div>'}
+  h+='<div class="nav">'+(i>0?'<button class="btn sec" id="bk">Atrás</button>':'')+'<button class="btn" id="nx">'+(i===Q.length-1?"Enviar":"Siguiente")+'</button></div>';
+  card.innerHTML=h;
+  bar.style.width=(i/Q.length*100)+"%";
+  var nx=document.getElementById("nx");nx.disabled=!ok(q);
+  if(q.type==="text"){var t=document.getElementById("tx");t.oninput=function(){A[q.k]=t.value;nx.disabled=!ok(q)};t.onkeydown=function(e){if(e.key==="Enter"&&ok(q))go(1)};}
+  else card.querySelectorAll(".opt").forEach(function(b){b.onclick=function(){
+    var o=q.o[+b.dataset.n];
+    if(q.type==="multi"){var a=A[q.k]||[],p=a.indexOf(o);p>-1?a.splice(p,1):a.push(o);A[q.k]=a;b.classList.toggle("on");}
+    else{A[q.k]=o;card.querySelectorAll(".opt").forEach(function(x){x.classList.remove("on")});b.classList.add("on");}
+    nx.disabled=!ok(q)}});
+  nx.onclick=function(){go(1)};
+  var bk=document.getElementById("bk");if(bk)bk.onclick=function(){go(-1)};
+}
+function go(d){i+=d;render()}
+function summary(){return "Respuestas de Dany\n"+Q.map(function(q){var v=A[q.k];return "• "+q.k+": "+(Array.isArray(v)?v.join(", "):v)}).join("\n")}
+function fin(){
+  bar.style.width="100%";document.getElementById("sub").textContent="¡Listo, Dany!";
+  card.innerHTML='<div class="end"><div class="bubble">Gracias por la encuesta 💜</div><br>'+
+  '<svg viewBox="0 0 200 210" aria-label="Mascota estilo Kuromi">'+
+  '<path d="M52 92 C30 50 38 14 62 8 C72 28 70 52 76 80Z" fill="#1d1328"/><path d="M58 70 C46 46 50 26 60 20 C64 36 64 52 68 68Z" fill="#ff7ac4"/>'+
+  '<path d="M148 92 C170 50 162 14 138 8 C128 28 130 52 124 80Z" fill="#1d1328"/><path d="M142 70 C154 46 150 26 140 20 C136 36 136 52 132 68Z" fill="#ff7ac4"/>'+
+  '<ellipse cx="100" cy="118" rx="70" ry="64" fill="#1d1328"/>'+
+  '<ellipse cx="100" cy="132" rx="52" ry="44" fill="#fff"/>'+
+  '<path d="M60 96 Q100 62 140 96 Q100 84 60 96Z" fill="#1d1328"/>'+
+  '<path d="M92 82 q8-12 16 0 q4 8-2 12 v6 h-12 v-6 q-6-4-2-12z" fill="#ff7ac4"/><circle cx="96" cy="86" r="2" fill="#1d1328"/><circle cx="104" cy="86" r="2" fill="#1d1328"/>'+
+  '<circle cx="82" cy="128" r="6" fill="#1d1328"/><circle cx="118" cy="128" r="6" fill="#1d1328"/><circle cx="84" cy="126" r="2" fill="#fff"/><circle cx="120" cy="126" r="2" fill="#fff"/>'+
+  '<ellipse cx="100" cy="140" rx="5" ry="3.5" fill="#1d1328"/>'+
+  '<path d="M90 150 Q100 160 110 150" stroke="#1d1328" stroke-width="3" fill="none" stroke-linecap="round"/>'+
+  '<circle cx="68" cy="146" r="7" fill="#ffb3dc" opacity=".7"/><circle cx="132" cy="146" r="7" fill="#ffb3dc" opacity=".7"/>'+
+  '<ellipse cx="62" cy="188" rx="18" ry="14" fill="#1d1328"/><ellipse cx="138" cy="188" rx="18" ry="14" fill="#1d1328"/></svg>'+
+  '<div class="sum" id="sm">'+esc(summary())+'</div>'+
+  '<div class="nav"><button class="btn sec" id="rs">Reiniciar</button><button class="btn" id="cp">Copiar respuestas</button></div></div>';
+  document.getElementById("rs").onclick=function(){A={};i=0;document.getElementById("sub").textContent="Hola Dany, quiero conocer tus gustos";render()};
+  document.getElementById("cp").onclick=function(){
+    var b=this,t=summary();
+    function done(){b.textContent="¡Copiado!"}
+    try{navigator.clipboard.writeText(t).then(done,function(){sel()})}catch(e){sel()}
+    function sel(){var r=document.createRange();r.selectNodeContents(document.getElementById("sm"));var s=getSelection();s.removeAllRanges();s.addRange(r);try{document.execCommand("copy");done()}catch(e){}}
+  };
+}
+render();
+</script>
+</body>
+</html>
